@@ -112,9 +112,9 @@ main() {
   info "Installing to ${INSTALL_DIR}/${BIN_NAME} …"
   if need_sudo; then
     warn "sudo required to write to ${INSTALL_DIR}"
-    if ! [ -t 0 ]; then
-      warn "stdin is not a TTY — re-run as: bash <(curl -fsSL https://raw.githubusercontent.com/${REPO}/main/install.sh)"
-      die "Cannot prompt for sudo password without a TTY."
+    # sudo prompts on /dev/tty, not stdin, so piped installs (curl | bash) still work in a terminal
+    if ! sudo -n true 2>/dev/null && ! { : </dev/tty; } 2>/dev/null; then
+      die "No terminal available for the sudo password prompt. Re-run from an interactive terminal."
     fi
   fi
   run_sudo mv "${bin_path}" "${INSTALL_DIR}/${BIN_NAME}"
